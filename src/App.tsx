@@ -9,10 +9,7 @@ import { MoodEntry } from './types';
 import { generateMockData } from './utils/mockData';
 
 function App() {
-  const [showInstructions, setShowInstructions] = useState(() => {
-    // Check if user has seen instructions before
-    return !localStorage.getItem('petpal-instructions-seen');
-  });
+  const [showInstructions, setShowInstructions] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState('mood');
   const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(() => {
@@ -39,12 +36,12 @@ function App() {
   }, [moodEntries]);
 
   const handleLogin = () => {
-    // Generate mock data on first login if no entries exist
-    if (moodEntries.length === 0) {
-      const mockData = generateMockData();
-      setMoodEntries(mockData);
-      console.log('Generated mock data on login:', mockData.length, 'entries');
-    }
+    console.log('Login clicked, current entries:', moodEntries.length);
+    // Always generate mock data on login for demo purposes
+    const mockData = generateMockData();
+    console.log('Generated mock data:', mockData.length, 'entries');
+    console.log('First 3 entries:', mockData.slice(0, 3));
+    setMoodEntries(mockData);
     setIsLoggedIn(true);
   };
 
@@ -61,7 +58,6 @@ function App() {
   };
 
   const handleContinueFromInstructions = () => {
-    localStorage.setItem('petpal-instructions-seen', 'true');
     setShowInstructions(false);
   };
 
