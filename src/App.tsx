@@ -16,7 +16,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState('mood');
   const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(() => {
-    // Initialize state with data from localStorage or mock data
+    // Initialize state with data from localStorage only
     const savedEntries = localStorage.getItem('petpal-mood-entries');
     if (savedEntries) {
       try {
@@ -27,11 +27,8 @@ function App() {
         console.error('Error loading saved mood entries:', error);
       }
     }
-    // If no saved data, generate mock data
-    const mockData = generateMockData();
-    console.log('Generated mock data:', mockData.length, 'entries');
-    console.log('Sample entries:', mockData.slice(0, 3));
-    return mockData;
+    // Start with empty array, mock data will be added on login
+    return [];
   });
 
   // Save mood entries whenever they change
@@ -42,6 +39,12 @@ function App() {
   }, [moodEntries]);
 
   const handleLogin = () => {
+    // Generate mock data on first login if no entries exist
+    if (moodEntries.length === 0) {
+      const mockData = generateMockData();
+      setMoodEntries(mockData);
+      console.log('Generated mock data on login:', mockData.length, 'entries');
+    }
     setIsLoggedIn(true);
   };
 
