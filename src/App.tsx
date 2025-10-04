@@ -1,31 +1,44 @@
 import { useState, useEffect } from 'react';
+import Instructions from './pages/Instructions';
 import Welcome from './pages/Welcome';
 import MoodTracker from './pages/MoodTracker';
 import Calendar from './pages/Calendar';
 import GoodMoodCards from './pages/GoodMoodCards';
 import Navigation from './components/Navigation';
 import { MoodEntry } from './types';
+import { generateMockData } from './utils/mockData';
 
 function App() {
+  const [showInstructions, setShowInstructions] = useState(() => {
+    // Check if user has seen instructions before
+    return !localStorage.getItem('petpal-instructions-seen');
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState('mood');
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
-
-  // Load saved mood entries on app start
-  useEffect(() => {
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(() => {
+    // Initialize state with data from localStorage or mock data
     const savedEntries = localStorage.getItem('petpal-mood-entries');
     if (savedEntries) {
       try {
-        setMoodEntries(JSON.parse(savedEntries));
+        const parsed = JSON.parse(savedEntries);
+        console.log('Loaded entries from localStorage:', parsed.length);
+        return parsed;
       } catch (error) {
         console.error('Error loading saved mood entries:', error);
       }
     }
-  }, []);
+    // If no saved data, generate mock data
+    const mockData = generateMockData();
+    console.log('Generated mock data:', mockData.length, 'entries');
+    console.log('Sample entries:', mockData.slice(0, 3));
+    return mockData;
+  });
 
   // Save mood entries whenever they change
   useEffect(() => {
-    localStorage.setItem('petpal-mood-entries', JSON.stringify(moodEntries));
+    if (moodEntries.length > 0) {
+      localStorage.setItem('petpal-mood-entries', JSON.stringify(moodEntries));
+    }
   }, [moodEntries]);
 
   const handleLogin = () => {
@@ -43,6 +56,15 @@ function App() {
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
   };
+
+  const handleContinueFromInstructions = () => {
+    localStorage.setItem('petpal-instructions-seen', 'true');
+    setShowInstructions(false);
+  };
+
+  if (showInstructions) {
+    return <Instructions onContinue={handleContinueFromInstructions} />;
+  }
 
   if (!isLoggedIn) {
     return <Welcome onLogin={handleLogin} />;
